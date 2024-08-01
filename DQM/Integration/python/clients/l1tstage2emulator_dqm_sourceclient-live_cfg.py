@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 import sys
-from Configuration.Eras.Era_Run3_cff import Run3
-process = cms.Process("L1TStage2EmulatorDQM", Run3)
+from Configuration.Eras.Era_Run3_2024_cff import Run3_2024
+process = cms.Process("L1TStage2EmulatorDQM", Run3_2024)
 
 unitTest = False
 if 'unitTest=True' in sys.argv:
@@ -24,7 +24,9 @@ else:
 #from DQM.Integration.config.fileinputsource_cfi import options
 
 # Required to load Global Tag
-process.load("DQM.Integration.config.FrontierCondition_GT_cfi")
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_Prompt_v3', '')
 
 # required for EMTF emulator
 process.load('Configuration.StandardSequences.MagneticField_cff')
