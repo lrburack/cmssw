@@ -18,11 +18,11 @@ void L1TStage2EMTF::bookHistograms(DQMStore::IBooker& ibooker, const edm::Run&, 
   ibooker.setCurrentFolder(monitorDir);
 
   const std::array<std::string, 6> binNamesErrors{
-      {"Corruptions", "Synch. Err.", "Synch. Mod.", "BX Mismatch", "Time Misalign", "FMM != Ready"}};
+      {"FMM != Ready", "Busy", "Out of synch", "Overflow"}};
 
   // DAQ Output Monitor Elements
-  emtfErrors = ibooker.book1D("emtfErrors", "EMTF Errors", 6, 0, 6);
-  emtfErrors->setAxisTitle("Error Type (Corruptions Not Implemented)", 1);
+  emtfErrors = ibooker.book1D("emtfErrors", "EMTF Errors", 4, 0, 4);
+  emtfErrors->setAxisTitle("Error Type", 1);
   emtfErrors->setAxisTitle("Number of Errors", 2);
   for (unsigned int bin = 0; bin < binNamesErrors.size(); ++bin) {
     emtfErrors->setBinLabel(bin + 1, binNamesErrors[bin], 1);
@@ -557,7 +557,7 @@ void L1TStage2EMTF::bookHistograms(DQMStore::IBooker& ibooker, const edm::Run&, 
 
     count = 0;
     cscLCTTimingFrac[hist] = ibooker.book2D(
-        "cscLCTTimingFrac" + nameBX[hist], "CSC Chamber Occupancy " + labelBX[hist], 42, 1, 43, 20, 0, 20);
+        "cscLCTTimingFrac" + nameBX[hist], "CSC Chamber Fraction in " + labelBX[hist], 42, 1, 43, 20, 0, 20);
     cscLCTTimingFrac[hist]->setAxisTitle("10#circ Chambers, (Ni = Neighbor of Sector i)", 1);
     for (int xbin = 1; xbin < 43; ++xbin) {
       cscLCTTimingFrac[hist]->setBinLabel(xbin, std::to_string(xbin - count), 1);
@@ -585,7 +585,7 @@ void L1TStage2EMTF::bookHistograms(DQMStore::IBooker& ibooker, const edm::Run&, 
 
     // Add GEM Timing Oct 27 2020
     gemHitTimingFrac[hist] =
-        ibooker.book2D("gemHitTimingFrac" + nameBX[hist], "GEM Chamber Occupancy " + labelBX[hist], 42, 1, 43, 2, 0, 2);
+        ibooker.book2D("gemHitTimingFrac" + nameBX[hist], "GEM Chamber Fraction in " + labelBX[hist], 42, 1, 43, 2, 0, 2);
     gemHitTimingFrac[hist]->setAxisTitle("10#circ Chambers, (Ni = Neighbor of Sector i)", 1);
     count = 0;
     for (int xbin = 1; xbin < 43; ++xbin) {
@@ -807,20 +807,16 @@ void L1TStage2EMTF::analyze(const edm::Event& e, const edm::EventSetup& c) {
 
   for (auto DaqOut = DaqOutCollection->begin(); DaqOut != DaqOutCollection->end(); ++DaqOut) {
     const l1t::emtf::MECollection* MECollection = DaqOut->PtrMECollection();
-    for (auto ME = MECollection->begin(); ME != MECollection->end(); ++ME) {
-      if (ME->SE())
-        emtfErrors->Fill(1);
-      if (ME->SM())
-        emtfErrors->Fill(2);
-      if (ME->BXE())
-        emtfErrors->Fill(3);
-      if (ME->AF())
-        emtfErrors->Fill(4);
-    }
 
     const l1t::emtf::EventHeader* EventHeader = DaqOut->PtrEventHeader();
     if (!EventHeader->Rdy())
-      emtfErrors->Fill(5);
+      emtfErrors->Fill(0);
+    if (EventHeader->BSY())
+      emtfErrors->Fill(1);
+    if (EventHeader->OSY())
+      emtfErrors->Fill(2);
+    if (EventHeader->WOF())
+      emtfErrors->Fill(3);
 
     // Fill MPC input link errors
     int offset = (EventHeader->Sector() - 1) * 9;
