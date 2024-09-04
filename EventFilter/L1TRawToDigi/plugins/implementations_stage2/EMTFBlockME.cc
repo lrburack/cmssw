@@ -200,7 +200,6 @@ namespace l1t {
         ME_.set_strip(GetHexBits(MEb, 0, 7));
         ME_.set_csc_ID(GetHexBits(MEb, 8, 11));
         ME_.set_lr(GetHexBits(MEb, 12, 12));
-        ME_.set_bxe(GetHexBits(MEb, 13, 13));
         ME_.set_bc0(GetHexBits(MEb, 14, 14));
 
         ME_.set_me_bxn(GetHexBits(MEc, 0, 11));
@@ -214,11 +213,15 @@ namespace l1t {
           ME_.set_tbin(GetHexBits(MEd, 0, 2));
         ME_.set_vp(GetHexBits(MEd, 3, 3));
         ME_.set_station(GetHexBits(MEd, 4, 6));
-        ME_.set_af(GetHexBits(MEd, 7, 7));
         ME_.set_epc(GetHexBits(MEd, 8, 11));
-        ME_.set_sm(GetHexBits(MEd, 12, 12));
-        ME_.set_se(GetHexBits(MEd, 13, 13));
         ME_.set_afef(GetHexBits(MEd, 14, 14));
+
+        // Error bits (removed in run 3 daq)
+        if !run3_DAQ_format: // Linden Burack 9/4/2024
+          ME_.set_bxe(GetHexBits(MEb, 13, 13));
+          ME_.set_af(GetHexBits(MEd, 7, 7));
+          ME_.set_sm(GetHexBits(MEd, 12, 12));
+          ME_.set_se(GetHexBits(MEd, 13, 13));
 
         // ME_.set_dataword     ( uint64_t dataword);
 

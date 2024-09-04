@@ -806,8 +806,6 @@ void L1TStage2EMTF::analyze(const edm::Event& e, const edm::EventSetup& c) {
   e.getByToken(daqToken, DaqOutCollection);
 
   for (auto DaqOut = DaqOutCollection->begin(); DaqOut != DaqOutCollection->end(); ++DaqOut) {
-    const l1t::emtf::MECollection* MECollection = DaqOut->PtrMECollection();
-
     const l1t::emtf::EventHeader* EventHeader = DaqOut->PtrEventHeader();
     if (!EventHeader->Rdy())
       emtfErrors->Fill(0);
